@@ -1,19 +1,19 @@
-(function() {
+(function () {
 
-    var mnemonic = new Mnemonic("english");
-    var bip32RootKey = null;
-    var bip32ExtendedKey = null;
-    var network = bitcoin.networks.microbitcoin;
-    var addressRowTemplate = $("#address-row-template");
+    const mnemonic = new Mnemonic("english");
+    let bip32RootKey = null;
+    let bip32ExtendedKey = null;
+    let network = bitcoin.networks.microbitcoin;
+    const addressRowTemplate = $("#address-row-template");
 
-    var showIndex = true;
-    var showAddress = true;
-    var showPubKey = true;
-    var showPrivKey = true;
+    let showIndex = true;
+    let showAddress = true;
+    let showPubKey = true;
+    let showPrivKey = true;
 
-    var phraseChangeTimeoutEvent = null;
+    let phraseChangeTimeoutEvent = null;
 
-    var DOM = {};
+    let DOM = {};
     DOM.network = $(".network");
     DOM.phraseNetwork = $("#network-phrase");
     DOM.phrase = $(".phrase");
@@ -46,7 +46,7 @@
     DOM.publicKeyToggle = $(".public-key-toggle");
     DOM.privateKeyToggle = $(".private-key-toggle");
 
-    var derivationPath = $(".tab-pane.active .path").val();
+    let derivationPath = $(".tab-pane.active .path").val();
 
     function init() {
         // Events
@@ -74,7 +74,7 @@
     // Event handlers
 
     function networkChanged(e) {
-        var network = e.target.value;
+        let network = e.target.value;
         networks[network].onSelect();
         setBip44DerivationPath();
         delayedPhraseChanged();
@@ -93,11 +93,11 @@
         showPending();
         hideValidationError();
         // Get the mnemonic phrase
-        var phrase = DOM.phrase.val();
-        var passphrase = DOM.passphrase.val();
+        let phrase = DOM.phrase.val();
+        let passphrase = DOM.passphrase.val();
 
         // Get the derivation path
-        var errorText = findDerivationPathErrors();
+        let errorText = findDerivationPathErrors();
         if (errorText) {
             showValidationError(errorText);
             return;
@@ -111,8 +111,8 @@
     function generateClicked() {
         clearDisplay();
         showPending();
-        setTimeout(function() {
-            var phrase = generateRandomPhrase();
+        setTimeout(function () {
+            let phrase = generateRandomPhrase();
             if (!phrase) {
                 return;
             }
@@ -121,7 +121,7 @@
     }
 
     function tabClicked(e) {
-        var activePath = $(e.target.getAttribute("href") + " .path");
+        let activePath = $(e.target.getAttribute("href") + " .path");
         derivationPath = activePath.val();
         derivationChanged();
     }
@@ -164,30 +164,30 @@
 
     function generateRandomPhrase() {
         if (!hasStrongRandom()) {
-            var errorText = "This browser does not support strong randomness";
+            let errorText = "This browser does not support strong randomness";
             showValidationError(errorText);
             return;
         }
-        var numWords = parseInt(DOM.strength.val());
-        var strength = numWords / 3 * 32;
-        var words = mnemonic.generate(strength);
+        let numWords = parseInt(DOM.strength.val());
+        let strength = numWords / 3 * 32;
+        let words = mnemonic.generate(strength);
         DOM.phrase.val(words);
         return words;
     }
 
     function calcBip32Seed(phrase, passphrase, path) {
-        var seed = mnemonic.toSeed(makeProperPhrase(phrase), passphrase);
+        let seed = mnemonic.toSeed(makeProperPhrase(phrase), passphrase);
         bip32RootKey = bitcoin.HDNode.fromSeedHex(seed, network);
         bip32ExtendedKey = bip32RootKey;
         // Derive the key from the path
-        var pathBits = path.split("/");
-        for (var i=0; i<pathBits.length; i++) {
-            var bit = pathBits[i];
-            var index = parseInt(bit);
+        let pathBits = path.split("/");
+        for (let i = 0; i < pathBits.length; i++) {
+            let bit = pathBits[i];
+            let index = parseInt(bit);
             if (isNaN(index)) {
                 continue;
             }
-            var hardened = bit[bit.length-1] == "'";
+            let hardened = bit[bit.length - 1] == "'";
             if (hardened) {
                 bip32ExtendedKey = bip32ExtendedKey.deriveHardened(index);
             }
@@ -213,10 +213,10 @@
         // TODO make this right
         // Preprocess the words
         phrase = mnemonic.normalizeString(phrase);
-        var parts = phrase.split(" ");
-        var proper = [];
-        for (var i=0; i<parts.length; i++) {
-            var part = parts[i];
+        let parts = phrase.split(" ");
+        let proper = [];
+        for (let i = 0; i < parts.length; i++) {
+            let part = parts[i];
             if (part.length > 0) {
                 // TODO check that lowercasing is always valid to do
                 proper.push(part.toLowerCase());
@@ -229,7 +229,7 @@
     function findPhraseErrors(phrase) {
         properPhrase = makeProperPhrase(phrase);
         // Check the words are valid
-        var isValid = mnemonic.check(properPhrase);
+        let isValid = mnemonic.check(properPhrase);
         if (!isValid) {
             return "Invalid mnemonic";
         }
@@ -243,15 +243,15 @@
 
     function displayBip32Info() {
         // Display the key
-        var rootKey = bip32RootKey.toBase58();
+        let rootKey = bip32RootKey.toBase58();
         DOM.rootKey.val(rootKey);
         DOM.rootKeyQr.html("")
         DOM.rootKeyQr.qrcode(rootKey);
-        var extendedPrivKey = bip32ExtendedKey.toBase58();
+        let extendedPrivKey = bip32ExtendedKey.toBase58();
         DOM.extendedPrivKey.val(extendedPrivKey);
         DOM.extendedPrivKeyQr.html("")
         DOM.extendedPrivKeyQr.qrcode(extendedPrivKey);
-        var extendedPubKey = bip32ExtendedKey.toBase58(false);
+        let extendedPubKey = bip32ExtendedKey.toBase58(false);
         DOM.extendedPubKey.val(extendedPubKey);
         DOM.extendedPubKeyQr.html("")
         DOM.extendedPubKeyQr.qrcode(extendedPubKey);
@@ -261,8 +261,8 @@
     }
 
     function displayAddresses(start, total) {
-        for (var i=0; i<total; i++) {
-            var index = i + start;
+        for (let i = 0; i < total; i++) {
+            let index = i + start;
             new TableRow(index);
         }
     }
@@ -274,34 +274,34 @@
         }
 
         function calculateValues() {
-            setTimeout(function() {
-                var key = bip32ExtendedKey.derive(index);
-                var address;
-                if (!network.ethereum) { 
-                    address = key.getAddress().toString();                
+            setTimeout(function () {
+                let key = bip32ExtendedKey.derive(index);
+                let address;
+                if (!network.ethereum) {
+                    address = key.getAddress().toString();
                 }
                 else {
-                    var pubData = new bitcoin.ECKey(key.privKey.d, false).pub.toHex();
-                    var buffer = new ArrayBuffer(64);
-                    var view = new Uint8Array(buffer);
-                    var offset = 0;
-                    for (var i=2; i<pubData.length; i += 2) {
+                    let pubData = new bitcoin.ECKey(key.privKey.d, false).pub.toHex();
+                    let buffer = new ArrayBuffer(64);
+                    let view = new Uint8Array(buffer);
+                    let offset = 0;
+                    for (let i = 2; i < pubData.length; i += 2) {
                         view[offset++] = parseInt(pubData.substr(i, 2), 16);
                     }
-                    var addressHex = keccak_256(buffer).substr(24).toLowerCase();
-                    var checksum = keccak_256(addressHex)
-                    var address = "0x";
-                    for (var i = 0; i < addressHex.length; i++) {
+                    let addressHex = keccak_256(buffer).substr(24).toLowerCase();
+                    let checksum = keccak_256(addressHex)
+                    let address = "0x";
+                    for (let i = 0; i < addressHex.length; i++) {
                         if (parseInt(checksum[i], 16) >= 8) {
-                          address += addressHex[i].toUpperCase()
+                            address += addressHex[i].toUpperCase()
                         } else {
-                          address += addressHex[i]
+                            address += addressHex[i]
                         }
                     }
                 }
-                var privkey;
+                let privkey;
 
-                var pubkey = key.pubKey.toHex();
+                let pubkey = key.pubKey.toHex();
                 if (!network.ethereum) {
                     privkey = key.privKey.toWIF(network);
                 }
@@ -318,14 +318,14 @@
     }
 
     function showMore() {
-        var start = DOM.addresses.children().length;
-        var rowsToAdd = parseInt(DOM.rowsToAdd.val());
+        let start = DOM.addresses.children().length;
+        let rowsToAdd = parseInt(DOM.rowsToAdd.val());
         if (isNaN(rowsToAdd)) {
             rowsToAdd = 20;
             DOM.rowsToAdd.val("20");
         }
         if (rowsToAdd > 200) {
-            var msg = "Generating " + rowsToAdd + " rows could take a while. ";
+            let msg = "Generating " + rowsToAdd + " rows could take a while. ";
             msg += "Do you want to continue?";
             if (!confirm(msg)) {
                 return;
@@ -351,21 +351,21 @@
     }
 
     function addAddressToList(index, address, pubkey, privkey) {
-        var row = $(addressRowTemplate.html());
+        let row = $(addressRowTemplate.html());
         // Elements
-        var indexCell = row.find(".index span");
-        var addressCell = row.find(".address a");
-        var pubkeyCell = row.find(".pubkey a");
-        var privkeyCell = row.find(".privkey a");
+        let indexCell = row.find(".index span");
+        let addressCell = row.find(".address a");
+        let pubkeyCell = row.find(".pubkey a");
+        let privkeyCell = row.find(".privkey a");
         // Content
-        var indexText = derivationPath + "/" + index;
+        let indexText = derivationPath + "/" + index;
         indexCell.text(indexText);
         addressCell.text(address);
-        addressCell.on("click",createQR);
+        addressCell.on("click", createQR);
         pubkeyCell.text(pubkey);
-        pubkeyCell.on("click",createQR);
+        pubkeyCell.on("click", createQR);
         privkeyCell.text(privkey);
-        privkeyCell.on("click",createQR);
+        privkeyCell.on("click", createQR);
         // Visibility
         if (!showIndex) {
             indexCell.addClass("invisible");
@@ -381,16 +381,16 @@
         }
         DOM.addresses.append(row);
     }
-    function createQR(event){
-        var target = event.target;
-        var address = target.innerText;
-        var parent = target.parentNode;
-        if($("#"+address).length){
-            $("#"+address).remove()
-        }else {
-            var div = $("<div/>")
+    function createQR(event) {
+        let target = event.target;
+        let address = target.innerText;
+        let parent = target.parentNode;
+        if ($("#" + address).length) {
+            $("#" + address).remove()
+        } else {
+            let div = $("<div/>")
 
-            div.attr("id",address);
+            div.attr("id", address);
             div.qrcode(address);
             div.appendTo(parent)
         }
@@ -400,17 +400,17 @@
     }
 
     function disableForms() {
-        $("form").on("submit", function(e) {
+        $("form").on("submit", function (e) {
             e.preventDefault();
         });
     }
 
     function setBip44DerivationPath() {
-        var purpose = parseIntNoNaN(DOM.bip44purpose.val(), 44);
-        var coin = parseIntNoNaN(DOM.bip44coin.val(), 0);
-        var account = parseIntNoNaN(DOM.bip44account.val(), 0);
-        var change = parseIntNoNaN(DOM.bip44change.val(), 0);
-        var path = "m/";
+        let purpose = parseIntNoNaN(DOM.bip44purpose.val(), 44);
+        let coin = parseIntNoNaN(DOM.bip44coin.val(), 0);
+        let account = parseIntNoNaN(DOM.bip44account.val(), 0);
+        let change = parseIntNoNaN(DOM.bip44change.val(), 0);
+        let path = "m/";
         path += purpose + "'/";
         path += coin + "'/";
         path += account + "'";
@@ -422,7 +422,7 @@
     }
 
     function parseIntNoNaN(val, defaultVal) {
-        var v = parseInt(val);
+        let v = parseInt(val);
         if (isNaN(v)) {
             return defaultVal;
         }
@@ -444,29 +444,29 @@
 
 
     function populateNetworkSelect() {
-        networks = networks.sort(function(a,b) {return (a.name > b.name) ? 1 : ((b.name > a.name) ? -1 : 0);} ); 
+        networks = networks.sort(function (a, b) { return (a.name > b.name) ? 1 : ((b.name > a.name) ? -1 : 0); });
 
-        for (var i=0; i<networks.length; i++) {
-            var network = networks[i];
-            var option = $("<option>");
+        for (let i = 0; i < networks.length; i++) {
+            let network = networks[i];
+            let option = $("<option>");
             option.attr("value", i);
             option.text(network.name);
             DOM.phraseNetwork.append(option);
         }
     }
 
-    var networks = [
+    let networks = [
 
         {
             name: "Microbitcoin",
-            onSelect: function() {
+            onSelect: function () {
                 network = bitcoin.networks.microbitcoin;
                 DOM.bip44coin.val(0);
             },
         },
         {
             name: "Microbitcoin Testnet",
-            onSelect: function() {
+            onSelect: function () {
                 network = bitcoin.networks.microbitcointest;
                 DOM.bip44coin.val(0);
             },
